@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -15,7 +17,7 @@ from .ssh_import import parse_connection_string
 # ---------------------------------------------------------------------------
 # Add / Edit Connection
 # ---------------------------------------------------------------------------
-class ConnectionFormScreen(ModalScreen[SSHConnection | None]):
+class ConnectionFormScreen(ModalScreen[Optional[SSHConnection]]):
     """Modal form for creating or editing a connection."""
 
     CSS = """
@@ -201,7 +203,7 @@ class ConnectionFormScreen(ModalScreen[SSHConnection | None]):
 # ---------------------------------------------------------------------------
 # Quick Connect (ad-hoc)
 # ---------------------------------------------------------------------------
-class QuickConnectScreen(ModalScreen[SSHConnection | None]):
+class QuickConnectScreen(ModalScreen[Optional[SSHConnection]]):
     """Fast ad-hoc SSH connection dialog."""
 
     CSS = """
