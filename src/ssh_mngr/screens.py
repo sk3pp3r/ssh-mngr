@@ -446,3 +446,195 @@ class AboutScreen(ModalScreen[None]):
 
     def key_question_mark(self) -> None:
         self.dismiss(None)
+
+
+# ---------------------------------------------------------------------------
+# Active Sessions (tmux panes)
+# ---------------------------------------------------------------------------
+class SessionsScreen(ModalScreen[Optional[str]]):
+    """Show active SSH sessions (tmux panes) and allow switching/killing."""
+
+    CSS = """
+    SessionsScreen {
+        align: center middle;
+    }
+
+    #sessions-dialog {
+        width: 70;
+        height: auto;
+        max-height: 30;
+        border: thick $accent;
+        background: $surface;
+        padding: 1 2;
+    }
+
+    #sessions-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+    #sessions-list {
+        height: auto;
+        max-height: 18;
+        padding: 0 1;
+    }
+
+    .session-row {
+        height: 3;
+    }
+
+    .session-label {
+        width: 1fr;
+        padding: 1 1 0 0;
+    }
+
+    .session-btn {
+        width: auto;
+        margin: 0 1;
+    }
+
+    #sessions-btns {
+        height: 3;
+        margin-top: 1;
+        align: center middle;
+    }
+
+    #sessions-btns Button { margin: 0 1; }
+    """
+
+    def __init__(self, sessions: list[dict]) -> None:
+        super().__init__()
+        self.sessions = sessions
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="sessions-dialog"):
+            yield Label("📡  Active SSH Sessions", id="sessions-title")
+            with Vertical(id="sessions-list"):
+                if not self.sessions:
+                    yield Label("[dim]No active sessions[/dim]")
+                else:
+                    for i, s in enumerate(self.sessions):
+                        with Horizontal(classes="session-row"):
+                            yield Label(
+                                f"[bold]{s['name']}[/bold]  [dim]{s.get('host', '')}[/dim]",
+                                classes="session-label",
+                            )
+                            yield Button(
+                                "Focus", variant="primary",
+                                id=f"focus-{i}", classes="session-btn",
+                            )
+                            yield Button(
+                                "Kill", variant="error",
+                                id=f"kill-{i}", classes="session-btn",
+                            )
+            with Horizontal(id="sessions-btns"):
+                yield Button("Broadcast…", variant="warning", id="btn-broadcast")
+                yield Button("Close", variant="default", id="btn-close")
+
+    @on(Button.Pressed)
+    def _on_button(self, event: Button.Pressed) -> None:
+        btn_id = event.button.id or ""
+        if btn_id.startswith("focus-"):
+            idx = int(btn_id.split("-")[1])
+            self.dismiss(f"focus:{self.sessions[idx]['pane_id']}")
+        elif btn_id.startswith("kill-"):
+            idx = int(btn_id.split("-")[1])
+            self.dismiss(f"kill:{self.sessions[idx]['pane_id']}")
+        elif btn_id == "btn-broadcast":
+            self.dismiss("broadcast")
+        elif btn_id == "btn-close":
+            self.dismiss(None)
+
+    def key_escape(self) -> None:
+        self.dismiss(None)
+
+
+# ---------------------------------------------------------------------------
+# Broadcast command
+# ---------------------------------------------------------------------------
+class BroadcastScreen(ModalScreen[Optional[str]]):
+    """Send a command to all active SSH sessions."""
+
+    CSS = """
+    BroadcastScreen {
+        align: center middle;
+    }
+
+    #broadcast-dialog {
+        width: 60;
+        height: auto;
+        border: thick $warning;
+        background: $surface;
+        padding: 1 2;
+    }
+
+    #broadcast-title {
+        text-align: center;
+        text-style: bold;
+        width: 100%;
+    }
+
+    #broadcast-hint {
+        text-align: center;
+        color: $text-disabled;
+        margin-bottom: 1;
+    }
+
+    #broadcast-input {
+        margin: 1 0;
+    }
+
+    #broadcast-btns {
+        height: 3;
+        margin-top: 1;
+        align: center middle;
+    }
+
+    #broadcast-btns Button { margin: 0 2; }
+    """
+
+    def __init__(self, session_count: int) -> None:
+        super().__init__()
+        self.session_count = session_count
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="broadcast-dialog"):
+            yield Label("📢  Broadcast Command", id="broadcast-title")
+            yield Label(
+                f"Send to {self.session_count} active session(s)",
+                id="broadcast-hint",
+            )
+            yield Input(
+                placeholder="Type command to send to all sessions…",
+                id="broadcast-input",
+            )
+            with Horizontal(id="broadcast-btns"):
+                yield Button("Send", variant="warning", id="btn-send")
+                yield Button("Cancel", variant="default", id="btn-cancel")
+
+    def on_mount(self) -> None:
+        self.query_one("#broadcast-input").focus()
+
+    @on(Button.Pressed, "#btn-send")
+    def _send(self) -> None:
+        self._do_send()
+
+    @on(Input.Submitted, "#broadcast-input")
+    def _submit(self) -> None:
+        self._do_send()
+
+    def _do_send(self) -> None:
+        cmd = self.query_one("#broadcast-input", Input).value.strip()
+        if cmd:
+            self.dismiss(cmd)
+        else:
+            self.notify("Enter a command!", severity="error")
+
+    @on(Button.Pressed, "#btn-cancel")
+    def _cancel(self) -> None:
+        self.dismiss(None)
+
+    def key_escape(self) -> None:
+        self.dismiss(None)

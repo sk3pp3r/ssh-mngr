@@ -19,12 +19,20 @@ from rich.text import Text
 
 from .config import Config
 from .models import SSHConnection
-from .screens import ConfirmScreen, ConnectionFormScreen, QuickConnectScreen, AboutScreen
+from .screens import (
+    AboutScreen,
+    BroadcastScreen,
+    ConfirmScreen,
+    ConnectionFormScreen,
+    QuickConnectScreen,
+    SessionsScreen,
+)
 from .ssh_import import import_ssh_config
+from . import tmux as tmux_mgr
 
 # ── Welcome splash ────────────────────────────────────────────────────────
 
-WELCOME = """\
+WELCOME_TEMPLATE = """\
 [bold cyan]
  ███████ ███████ ██   ██
  ██      ██      ██   ██
@@ -32,9 +40,11 @@ WELCOME = """\
       ██      ██ ██   ██
  ███████ ███████ ██   ██
 [/]
-[dim]Terminal SSH Connection Manager  v0.1.3[/]
+[dim]Terminal SSH Connection Manager  v{version}[/]
 
 [dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
+
+{tmux_status}
 
 [bold]Keyboard Shortcuts[/]
 
@@ -44,6 +54,8 @@ WELCOME = """\
   [cyan]f[/]       Quick connect  (ad-hoc)
   [cyan]i[/]       Import from ~/.ssh/config
   [cyan]Enter[/]   Connect to selected server
+  [cyan]t[/]       Active sessions (tmux)
+  [cyan]b[/]       Broadcast command to all sessions
   [cyan]s[/]       Focus search bar
   [cyan]?[/]       About / Help
   [cyan]q[/]       Quit
@@ -52,13 +64,26 @@ WELCOME = """\
 """
 
 
+def _build_welcome() -> str:
+    from . import __version__
+
+    if tmux_mgr.inside_tmux():
+        status = "[bold green]● tmux[/]  Sessions open in panes — TUI stays visible"
+    elif tmux_mgr.has_tmux():
+        status = "[bold yellow]○ tmux[/]  Available — run inside tmux for pane mode"
+    else:
+        status = "[dim]○ tmux  Not installed — sessions open in full screen[/]"
+
+    return WELCOME_TEMPLATE.format(version=__version__, tmux_status=status)
+
+
 # ── Detail panel widget ───────────────────────────────────────────────────
 
 class ConnectionDetail(Static):
     """Right-hand panel showing connection info or welcome screen."""
 
     def show_welcome(self) -> None:
-        self.update(WELCOME)
+        self.update(_build_welcome())
 
     def show_connection(self, conn: SSHConnection) -> None:
         tbl = Table(
@@ -179,6 +204,8 @@ class SSHManagerApp(App):
         Binding("f", "quick_connect", "Quick ⚡"),
         Binding("enter", "do_connect", "Connect", show=True),
         Binding("i", "import_config", "Import"),
+        Binding("t", "show_sessions", "Sessions"),
+        Binding("b", "broadcast", "Broadcast"),
         Binding("s", "search_focus", "Search"),
         Binding("question_mark", "show_about", "About ?"),
     ]
@@ -188,6 +215,7 @@ class SSHManagerApp(App):
     def __init__(self) -> None:
         super().__init__()
         self.config_mgr = Config()
+        self.active_sessions: list[dict] = []  # tracks tmux pane sessions
 
     # ── compose ───────────────────────────────────────────────────────
 
@@ -337,6 +365,26 @@ class SSHManagerApp(App):
     def action_show_about(self) -> None:
         self.push_screen(AboutScreen())
 
+    def action_show_sessions(self) -> None:
+        self._prune_dead_sessions()
+        if not self.active_sessions:
+            self.notify("No active sessions", severity="warning")
+            return
+        self.push_screen(
+            SessionsScreen(self.active_sessions),
+            callback=self._cb_sessions,
+        )
+
+    def action_broadcast(self) -> None:
+        self._prune_dead_sessions()
+        if not self.active_sessions:
+            self.notify("No active sessions to broadcast to", severity="warning")
+            return
+        self.push_screen(
+            BroadcastScreen(len(self.active_sessions)),
+            callback=self._cb_broadcast,
+        )
+
     # ── callbacks ─────────────────────────────────────────────────────
 
     def _cb_add(self, conn: SSHConnection | None) -> None:
@@ -364,6 +412,40 @@ class SSHManagerApp(App):
         if conn:
             self._ssh_connect(conn)
 
+    def _cb_sessions(self, action: str | None) -> None:
+        if not action:
+            return
+        if action.startswith("focus:"):
+            pane_id = action.split(":", 1)[1]
+            tmux_mgr.select_pane(pane_id)
+            self.notify(f"Switched to pane {pane_id}")
+        elif action.startswith("kill:"):
+            pane_id = action.split(":", 1)[1]
+            tmux_mgr.kill_pane(pane_id)
+            self.active_sessions = [
+                s for s in self.active_sessions if s["pane_id"] != pane_id
+            ]
+            self.notify(f"Killed session in pane {pane_id}")
+        elif action == "broadcast":
+            self.action_broadcast()
+
+    def _cb_broadcast(self, command: str | None) -> None:
+        if not command:
+            return
+        self._prune_dead_sessions()
+        pane_ids = [s["pane_id"] for s in self.active_sessions]
+        count = tmux_mgr.broadcast_to_panes(pane_ids, command)
+        self.notify(f"Sent to {count}/{len(pane_ids)} session(s)")
+
+    # ── session helpers ───────────────────────────────────────────────
+
+    def _prune_dead_sessions(self) -> None:
+        """Remove sessions whose tmux pane no longer exists."""
+        self.active_sessions = [
+            s for s in self.active_sessions
+            if tmux_mgr.is_pane_alive(s["pane_id"])
+        ]
+
     # ── SSH ───────────────────────────────────────────────────────────
 
     def _ssh_connect(self, conn: SSHConnection) -> None:
@@ -374,8 +456,25 @@ class SSHManagerApp(App):
 
         cmd = conn.build_command()
 
-        with self.suspend():
-            subprocess.run(cmd)
+        if tmux_mgr.inside_tmux():
+            # Open SSH in a new tmux pane — TUI stays visible
+            pane_id = tmux_mgr.open_ssh_pane(cmd, conn.name)
+            if pane_id:
+                self.active_sessions.append({
+                    "name": conn.name,
+                    "host": conn.host,
+                    "pane_id": pane_id,
+                    "conn_id": conn.id,
+                })
+                self.notify(
+                    f"[green]⚡[/] {conn.name} opened in tmux pane {pane_id}"
+                )
+            else:
+                self.notify("Failed to open tmux pane", severity="error")
+        else:
+            # Fallback: suspend TUI and run SSH in foreground
+            with self.suspend():
+                subprocess.run(cmd)
 
         self._rebuild_tree()
 
@@ -383,6 +482,18 @@ class SSHManagerApp(App):
 # ── entry point ───────────────────────────────────────────────────────────
 
 def main() -> None:
+    import sys
+
+    # If tmux is available but we're not inside it,
+    # offer to relaunch inside tmux (unless --no-tmux flag)
+    if "--no-tmux" not in sys.argv and tmux_mgr.has_tmux() and not tmux_mgr.inside_tmux():
+        # Auto-launch inside tmux for the full experience
+        tmux_mgr.relaunch_in_tmux()
+        return  # unreachable if exec succeeds
+
+    # Remove our flag so textual doesn't see it
+    sys.argv = [a for a in sys.argv if a != "--no-tmux"]
+
     app = SSHManagerApp()
     app.run()
 
