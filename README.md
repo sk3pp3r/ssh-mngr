@@ -3,7 +3,7 @@
 > **A beautiful terminal SSH connection manager — like mRemoteNG / RoyalTSX, but right inside your terminal.**
 
 [![PyPI version](https://img.shields.io/pypi/v/ssh-mngr)](https://pypi.org/project/ssh-mngr/)
-[![Python 3.10+](https://img.shields.io/pypi/pyversions/ssh-mngr)](https://pypi.org/project/ssh-mngr/)
+[![Python 3.9+](https://img.shields.io/pypi/pyversions/ssh-mngr)](https://pypi.org/project/ssh-mngr/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Built with [Textual](https://textual.textualize.io/) + [Rich](https://rich.readthedocs.io/) — no GUI, no browser, just your terminal.
@@ -144,18 +144,6 @@ Example:
 - [ ] Export / import connections (JSON / YAML)
 - [ ] SCP / file transfer shortcut
 - [ ] Theme customisation
-
----
-
-## 🤝 Contributing
-
-```bash
-git clone https://github.com/sk3pp3r/ssh-mngr.git
-cd ssh-mngr
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
-ssh-mngr
-```
 
 ---
 

@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ssh-mngr"
-version = "0.1.0"
+version = "0.1.1"
 description = "A beautiful terminal SSH connection manager — like mRemoteNG for your terminal"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = ["ssh", "terminal", "tui", "connection-manager", "devops", "sysadmin"]
@@ -23,6 +23,7 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
