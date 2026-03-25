@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SSH Manager — Terminal SSH Connection Manager</title>
+  <meta name="description" content="A beautiful terminal SSH connection manager. Like mRemoteNG / RoyalTSX, but right inside your terminal." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --accent: #58a6ff;
+      --accent2: #1f6feb;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --border: #30363d;
+      --card-bg: #161b22;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-ascii {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .badge-row img { height: 22px; }
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform 0.1s;
+    }
+    .btn:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn-primary { background: var(--accent2); color: #fff; }
+    .btn-secondary { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+
+    /* Install box */
+    .install-box {
+      max-width: 480px;
+      margin: 2rem auto 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    .install-box .prompt { color: var(--green); }
+    .install-box .cmd { color: #fff; }
+
+    /* Sections */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 2rem; }
+    section { padding: 4rem 0; }
+    section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    section .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Feature grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .feature-card .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .feature-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.3rem; }
+    .feature-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* Shortcuts table */
+    .shortcuts-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    .shortcuts-table th, .shortcuts-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .shortcuts-table th { color: var(--text-muted); font-weight: 600; }
+    .shortcuts-table kbd {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+
+    /* Terminal mockup */
+    .terminal {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .terminal-bar {
+      background: var(--bg2);
+      padding: 0.6rem 1rem;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .t-cyan { color: var(--accent); }
+    .t-green { color: var(--green); }
+    .t-yellow { color: var(--yellow); }
+    .t-dim { color: var(--text-muted); }
+    .t-bold { font-weight: 700; color: #fff; }
+
+    /* Config section */
+    .config-block {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero-ascii { font-size: 0.7rem; }
+      .terminal-body { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-ascii">
+███████ ███████ ██   ██
+██      ██      ██   ██
+███████ ███████ ███████  ─── Manager
+     ██      ██ ██   ██
+███████ ███████ ██   ██
+    </div>
+    <h1>SSH Manager</h1>
+    <p>A beautiful terminal SSH connection manager — like mRemoteNG / RoyalTSX, but right inside your terminal.</p>
+
+    <div class="badge-row">
+      <a href="https://pypi.org/project/ssh-mngr/"><img src="https://img.shields.io/pypi/v/ssh-mngr?style=flat-square" alt="PyPI" /></a>
+      <a href="https://pypi.org/project/ssh-mngr/"><img src="https://img.shields.io/pypi/pyversions/ssh-mngr?style=flat-square" alt="Python" /></a>
+      <a href="https://github.com/sk3pp3r/ssh-mngr/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT" /></a>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/sk3pp3r/ssh-mngr">⭐ GitHub</a>
+      <a class="btn btn-secondary" href="https://pypi.org/project/ssh-mngr/">📦 PyPI</a>
+    </div>
+
+    <div class="install-box">
+      <span class="prompt">$</span> <span class="cmd">pipx install ssh-mngr</span><br/>
+      <span class="prompt">$</span> <span class="cmd">ssm</span>
+    </div>
+  </section>
+
+  <!-- Terminal preview -->
+  <section>
+    <div class="container">
+      <h2>📺 Preview</h2>
+      <p class="subtitle">Norton Commander-style layout — sidebar + detail panel</p>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-title">ssh-mngr</span>
+        </div>
+        <div class="terminal-body"><span class="t-bold">🖥  CONNECTIONS</span>          │
+<span class="t-dim">🔍  Search…</span>               │  <span class="t-cyan">🔑  Production Web</span>
+─────────────────────────────│  ──────────────────────────────
+<span class="t-bold">📁 Production (3)</span>            │  <span class="t-cyan">Host</span>           10.0.1.50
+  <span class="t-green">▸ 🔑 Production Web</span>       │  <span class="t-cyan">Port</span>           22
+    🖥  DB Master             │  <span class="t-cyan">Username</span>       deploy
+    🖥  DB Replica            │  <span class="t-cyan">Identity File</span>  ~/.ssh/prod.pem
+<span class="t-bold">📁 Staging (2)</span>               │  <span class="t-cyan">Group</span>          Production
+    🔑 Staging API            │  <span class="t-cyan">Last Connected</span> 2026-03-25 14:30
+    🖥  Staging Worker        │
+<span class="t-bold">📁 Dev (1)</span>                   │  <span class="t-cyan">SSH Command</span>
+    🖥  Dev Box               │  <span class="t-green">ssh -i ~/.ssh/prod.pem deploy@10.0.1.50</span>
+                              │
+<span class="t-dim">  a Add  e Edit  d Del  f Quick  Enter Connect  q Quit</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="container">
+      <h2>🎯 Features</h2>
+      <p class="subtitle">Everything you need to manage SSH connections</p>
+      <div class="features">
+        <div class="feature-card">
+          <div class="icon">📁</div>
+          <h3>Grouped Connections</h3>
+          <p>Organise servers into named folders — Production, Staging, Dev, whatever you need.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔑</div>
+          <h3>PEM / Identity File</h3>
+          <p>Per-connection key file support. Different keys for different servers, no problem.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>Quick Connect</h3>
+          <p>Ad-hoc <code>user@host:port</code> connection without saving. Just press <kbd>f</kbd>.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📥</div>
+          <h3>SSH Config Import</h3>
+          <p>One-key import from <code>~/.ssh/config</code>. Press <kbd>i</kbd> and you're done.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔍</div>
+          <h3>Live Search</h3>
+          <p>Filter connections as you type. Find any server instantly across all groups.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🕐</div>
+          <h3>Last Connected</h3>
+          <p>Tracks when you last used each connection. Never wonder which server you were on.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🖥</div>
+          <h3>Detail Panel</h3>
+          <p>Full connection info at a glance — host, port, user, key, and the SSH command.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🐧</div>
+          <h3>Cross-Platform</h3>
+          <p>Works on macOS and Linux terminals. Anywhere Python runs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Keyboard shortcuts -->
+  <section>
+    <div class="container">
+      <h2>⌨️ Keyboard Shortcuts</h2>
+      <p class="subtitle">Designed for speed — everything is one key away</p>
+      <table class="shortcuts-table">
+        <thead>
+          <tr><th>Key</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><kbd>a</kbd></td><td>Add new connection</td></tr>
+          <tr><td><kbd>e</kbd></td><td>Edit selected connection</td></tr>
+          <tr><td><kbd>d</kbd></td><td>Delete selected connection</td></tr>
+          <tr><td><kbd>f</kbd></td><td>Quick connect — ad-hoc SSH</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Connect to selected server</td></tr>
+          <tr><td><kbd>i</kbd></td><td>Import from ~/.ssh/config</td></tr>
+          <tr><td><kbd>s</kbd></td><td>Focus search bar</td></tr>
+          <tr><td><kbd>q</kbd></td><td>Quit</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section>
+    <div class="container">
+      <h2>📦 Install</h2>
+      <p class="subtitle">One command and you're ready</p>
+
+      <div class="config-block">
+<span class="t-dim"># Recommended (isolated)</span>
+<span class="t-green">$</span> pipx install ssh-mngr
+
+<span class="t-dim"># Or with pip</span>
+<span class="t-green">$</span> pip install ssh-mngr
+
+<span class="t-dim"># From source</span>
+<span class="t-green">$</span> git clone https://github.com/sk3pp3r/ssh-mngr.git
+<span class="t-green">$</span> cd ssh-mngr &amp;&amp; pip install .
+
+<span class="t-dim"># Offline (air-gapped servers)</span>
+<span class="t-green">$</span> pip wheel . -w dist/ &amp;&amp; pip download -d dist/ .
+<span class="t-dim"># transfer dist/ → target machine</span>
+<span class="t-green">$</span> pip install --no-index --find-links=./dist ssh-mngr
+      </div>
+    </div>
+  </section>
+
+  <!-- Config -->
+  <section>
+    <div class="container">
+      <h2>⚙️ Configuration</h2>
+      <p class="subtitle">Connections stored as JSON at <code>~/.config/ssh-mngr/connections.json</code></p>
+      <div class="config-block">
+{
+  <span class="t-cyan">"version"</span>: 1,
+  <span class="t-cyan">"connections"</span>: [
+    {
+      <span class="t-cyan">"name"</span>: <span class="t-green">"Production Web"</span>,
+      <span class="t-cyan">"host"</span>: <span class="t-green">"10.0.1.50"</span>,
+      <span class="t-cyan">"port"</span>: 22,
+      <span class="t-cyan">"username"</span>: <span class="t-green">"deploy"</span>,
+      <span class="t-cyan">"identity_file"</span>: <span class="t-green">"~/.ssh/prod.pem"</span>,
+      <span class="t-cyan">"group"</span>: <span class="t-green">"Production"</span>
+    }
+  ]
+}
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Made with ❤️ by <a href="https://github.com/sk3pp3r">sk3pp3r</a> · MIT License</p>
+    <p style="margin-top: 0.5rem;">
+      <a href="https://github.com/sk3pp3r/ssh-mngr">GitHub</a> ·
+      <a href="https://pypi.org/project/ssh-mngr/">PyPI</a>
+    </p>
+  </footer>
+
+</body>
+</html>
