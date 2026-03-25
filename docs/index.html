@@ -246,7 +246,8 @@
     </div>
 
     <div class="install-box">
-      <span class="prompt">$</span> <span class="cmd">pipx install ssh-mngr</span><br/>
+      <span class="prompt">$</span> <span class="cmd">brew tap sk3pp3r/tap &amp;&amp; brew install ssh-mngr</span><br/>
+      <span class="t-dim"># or: pipx install ssh-mngr</span><br/>
       <span class="prompt">$</span> <span class="cmd">ssm</span>
     </div>
   </section>
@@ -361,7 +362,11 @@
       <p class="subtitle">One command and you're ready</p>
 
       <div class="config-block">
-<span class="t-dim"># Recommended (isolated)</span>
+<span class="t-dim"># Homebrew (macOS)</span>
+<span class="t-green">$</span> brew tap sk3pp3r/tap
+<span class="t-green">$</span> brew install ssh-mngr
+
+<span class="t-dim"># PyPI (pip / pipx)</span>
 <span class="t-green">$</span> pipx install ssh-mngr
 
 <span class="t-dim"># Or with pip</span>

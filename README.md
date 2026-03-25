@@ -21,7 +21,11 @@ If you SSH into multiple Linux servers daily — some with your user, some with 
 ## 📦 Install
 
 ```bash
-# From PyPI (recommended)
+# Homebrew (macOS)
+brew tap sk3pp3r/tap
+brew install ssh-mngr
+
+# From PyPI
 pipx install ssh-mngr
 
 # Or with pip
