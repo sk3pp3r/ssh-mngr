@@ -3,8 +3,8 @@ class SshMngr < Formula
 
   desc "Beautiful terminal SSH connection manager — like mRemoteNG for your terminal"
   homepage "https://github.com/sk3pp3r/ssh-mngr"
-  url "https://files.pythonhosted.org/packages/a7/19/fb11b736a8d17dda14795a1446233d43c6c3c2ad81f2adf130177cdbf658/ssh_mngr-0.1.4.tar.gz"
-  sha256 "2c936e41e68067be973d8ca2d5eea37e49e36a54350b88b547ba012910fe7d90"
+  url "https://files.pythonhosted.org/packages/8e/13/e4102f39d5f9660ddb37cd5aac8b2368ae357252aeb26cb54594f7a2f05c/ssh_mngr-0.1.5.tar.gz"
+  sha256 "f233fd8f8af3c89d4855c1b73521081fecd9157dde37cdd314f0d71a42743cc9"
   license "MIT"
 
   depends_on "python@3.13"
@@ -13,7 +13,7 @@ class SshMngr < Formula
     venv = virtualenv_create(libexec, "python3.13")
     system libexec/"bin/python3", "-m", "ensurepip"
     system libexec/"bin/python3", "-m", "pip", "install",
-           "--prefer-binary", "--no-cache-dir", "ssh-mngr==0.1.4"
+           "--prefer-binary", "--no-cache-dir", "ssh-mngr==0.1.5"
 
     (bin/"ssh-mngr").write_env_script(libexec/"bin/ssh-mngr",
       PATH: "#{libexec}/bin:${PATH}")

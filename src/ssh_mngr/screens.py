@@ -15,6 +15,54 @@ from .ssh_import import parse_connection_string
 
 
 # ---------------------------------------------------------------------------
+# Splash Screen (auto-dismiss)
+# ---------------------------------------------------------------------------
+class SplashScreen(ModalScreen[None]):
+    """Brief splash shown on startup."""
+
+    CSS = """
+    SplashScreen {
+        align: center middle;
+        background: $surface 90%;
+    }
+
+    #splash-box {
+        width: auto;
+        height: auto;
+        padding: 2 4;
+        border: heavy $accent;
+        background: $surface;
+        text-align: center;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        from . import __version__
+
+        splash = (
+            "[bold cyan]"
+            " ███████ ███████ ██   ██\n"
+            " ██      ██      ██   ██\n"
+            " ███████ ███████ ███████  ─── Manager\n"
+            "      ██      ██ ██   ██\n"
+            " ███████ ███████ ██   ██\n"
+            "[/]\n\n"
+            f"[dim]v{__version__}  •  Terminal SSH Connection Manager[/]\n"
+            "[dim]by Haim Cohen (@sk3pp3r)[/]"
+        )
+        yield Label(splash, id="splash-box")
+
+    def on_mount(self) -> None:
+        self.set_timer(1.5, self.dismiss)
+
+    def on_key(self) -> None:
+        self.dismiss()
+
+    def on_click(self) -> None:
+        self.dismiss()
+
+
+# ---------------------------------------------------------------------------
 # Add / Edit Connection
 # ---------------------------------------------------------------------------
 class ConnectionFormScreen(ModalScreen[Optional[SSHConnection]]):
@@ -424,6 +472,8 @@ class AboutScreen(ModalScreen[None]):
             "  [cyan]Enter[/]   Connect to selected server\n"
             "  [cyan]i[/]       Import from ~/.ssh/config\n"
             "  [cyan]s[/]       Focus search bar\n"
+            "  [cyan]Esc[/]     Clear search & return to tree\n"
+            "  [cyan]r[/]       Refresh / reload config\n"
             "  [cyan]?[/]       This help screen\n"
             "  [cyan]q[/]       Quit\n"
             "\n"

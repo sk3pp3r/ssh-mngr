@@ -19,7 +19,7 @@ from rich.text import Text
 
 from .config import Config
 from .models import SSHConnection
-from .screens import ConfirmScreen, ConnectionFormScreen, QuickConnectScreen, AboutScreen
+from .screens import ConfirmScreen, ConnectionFormScreen, QuickConnectScreen, AboutScreen, SplashScreen
 from .ssh_import import import_ssh_config
 
 # ── Welcome splash ────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ WELCOME = """\
       ██      ██ ██   ██
  ███████ ███████ ██   ██
 [/]
-[dim]Terminal SSH Connection Manager  v0.1.4[/]
+[dim]Terminal SSH Connection Manager  v0.1.5[/]
 
 [dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
 
@@ -210,6 +210,7 @@ class SSHManagerApp(App):
         tree.root.expand()
         tree.focus()
         self.query_one("#detail", ConnectionDetail).show_welcome()
+        self.push_screen(SplashScreen())
 
     # ── tree helpers ──────────────────────────────────────────────────
 
@@ -271,6 +272,17 @@ class SSHManagerApp(App):
     @on(Input.Changed, "#search-box")
     def _on_search(self, event: Input.Changed) -> None:
         self._rebuild_tree(event.value)
+
+    @on(Input.Submitted, "#search-box")
+    def _on_search_submit(self) -> None:
+        self.query_one("#conn-tree", Tree).focus()
+
+    def key_escape(self) -> None:
+        search = self.query_one("#search-box", Input)
+        if search.has_focus:
+            search.value = ""
+            self._rebuild_tree()
+            self.query_one("#conn-tree", Tree).focus()
 
     # ── actions (key bindings) ────────────────────────────────────────
 
