@@ -32,7 +32,7 @@ WELCOME = """\
       ██      ██ ██   ██
  ███████ ███████ ██   ██
 [/]
-[dim]Terminal SSH Connection Manager  v0.1.5[/]
+[dim]Terminal SSH Connection Manager  v0.1.6[/]
 
 [dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
 

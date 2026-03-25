@@ -53,13 +53,17 @@ class SplashScreen(ModalScreen[None]):
         yield Label(splash, id="splash-box")
 
     def on_mount(self) -> None:
-        self.set_timer(1.5, self.dismiss)
+        self.set_timer(0.8, self._close)
+
+    def _close(self) -> None:
+        if self.is_current:
+            self.dismiss()
 
     def on_key(self) -> None:
-        self.dismiss()
+        self.call_later(self._close)
 
     def on_click(self) -> None:
-        self.dismiss()
+        self.call_later(self._close)
 
 
 # ---------------------------------------------------------------------------

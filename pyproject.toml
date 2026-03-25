@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ssh-mngr"
-version = "0.1.5"
+version = "0.1.6"
 description = "A beautiful terminal SSH connection manager — like mRemoteNG for your terminal"
 readme = "README.md"
 requires-python = ">=3.9"
