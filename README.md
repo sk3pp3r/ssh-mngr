@@ -77,6 +77,7 @@ ssm           # short alias — same thing
 | `Enter`   | **Connect** to selected server        |
 | `i`       | **Import** from `~/.ssh/config`       |
 | `s`       | **Search** — focus the filter bar     |
+| `r`       | **Refresh** — reload config file      |
 | `q`       | **Quit**                              |
 
 ---

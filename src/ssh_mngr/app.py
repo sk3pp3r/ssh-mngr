@@ -32,7 +32,7 @@ WELCOME = """\
       ██      ██ ██   ██
  ███████ ███████ ██   ██
 [/]
-[dim]Terminal SSH Connection Manager  v0.1.3[/]
+[dim]Terminal SSH Connection Manager  v0.1.4[/]
 
 [dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
 
@@ -45,6 +45,7 @@ WELCOME = """\
   [cyan]i[/]       Import from ~/.ssh/config
   [cyan]Enter[/]   Connect to selected server
   [cyan]s[/]       Focus search bar
+  [cyan]r[/]       Refresh / reload config
   [cyan]?[/]       About / Help
   [cyan]q[/]       Quit
 
@@ -181,6 +182,7 @@ class SSHManagerApp(App):
         Binding("i", "import_config", "Import"),
         Binding("s", "search_focus", "Search"),
         Binding("question_mark", "show_about", "About ?"),
+        Binding("r", "refresh", "Refresh"),
     ]
 
     selected_connection: reactive[SSHConnection | None] = reactive(None)
@@ -336,6 +338,13 @@ class SSHManagerApp(App):
 
     def action_show_about(self) -> None:
         self.push_screen(AboutScreen())
+
+    def action_refresh(self) -> None:
+        """Reload connections from config file and rebuild the tree."""
+        self.config_mgr = Config()
+        self._rebuild_tree()
+        self.query_one("#detail", ConnectionDetail).show_welcome()
+        self.notify("Configuration reloaded")
 
     # ── callbacks ─────────────────────────────────────────────────────
 
