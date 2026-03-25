@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ssh-mngr"
+version = "0.1.0"
+description = "A beautiful terminal SSH connection manager — like mRemoteNG for your terminal"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["ssh", "terminal", "tui", "connection-manager", "devops"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "textual>=0.80.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+ssh-mngr = "ssh_mngr.app:main"
+ssm = "ssh_mngr.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ssh_mngr"]
