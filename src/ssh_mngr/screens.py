@@ -361,3 +361,88 @@ class ConfirmScreen(ModalScreen[bool]):
 
     def key_escape(self) -> None:
         self.dismiss(False)
+
+
+# ---------------------------------------------------------------------------
+# About / Help
+# ---------------------------------------------------------------------------
+class AboutScreen(ModalScreen[None]):
+    """About & help screen."""
+
+    CSS = """
+    AboutScreen {
+        align: center middle;
+    }
+
+    #about-dialog {
+        width: 64;
+        height: auto;
+        max-height: 36;
+        border: thick $accent;
+        background: $surface;
+        padding: 1 2;
+    }
+
+    #about-content {
+        padding: 1 2;
+    }
+
+    #about-close {
+        height: 3;
+        margin-top: 1;
+        align: center middle;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        from . import __version__
+
+        about_text = (
+            "[bold cyan]"
+            " ███████ ███████ ██   ██\n"
+            " ██      ██      ██   ██\n"
+            " ███████ ███████ ███████  ─── Manager\n"
+            "      ██      ██ ██   ██\n"
+            " ███████ ███████ ██   ██\n"
+            "[/]\n"
+            f"[bold]Version[/]        {__version__}\n"
+            "[bold]Author[/]         Haim Cohen (@sk3pp3r)\n"
+            "[bold]License[/]        MIT\n"
+            "\n"
+            "[bold]Repository[/]     [cyan]github.com/sk3pp3r/ssh-mngr[/cyan]\n"
+            "[bold]PyPI[/]           [cyan]pypi.org/project/ssh-mngr[/cyan]\n"
+            "[bold]Website[/]        [cyan]sk3pp3r.github.io/ssh-mngr[/cyan]\n"
+            "\n"
+            "[dim]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]\n"
+            "\n"
+            "[bold]Keyboard Shortcuts[/]\n"
+            "\n"
+            "  [cyan]a[/]       Add new connection\n"
+            "  [cyan]e[/]       Edit selected connection\n"
+            "  [cyan]d[/]       Delete selected connection\n"
+            "  [cyan]f[/]       Quick connect (ad-hoc)\n"
+            "  [cyan]Enter[/]   Connect to selected server\n"
+            "  [cyan]i[/]       Import from ~/.ssh/config\n"
+            "  [cyan]s[/]       Focus search bar\n"
+            "  [cyan]?[/]       This help screen\n"
+            "  [cyan]q[/]       Quit\n"
+            "\n"
+            "[dim]Config  ~/.config/ssh-mngr/connections.json[/]\n"
+            "\n"
+            "[dim]Built with Textual + Rich  •  Python 3.9+[/]"
+        )
+
+        with Vertical(id="about-dialog"):
+            yield Label(about_text, id="about-content")
+            with Horizontal(id="about-close"):
+                yield Button("Close", variant="primary", id="btn-close")
+
+    @on(Button.Pressed, "#btn-close")
+    def _close(self) -> None:
+        self.dismiss(None)
+
+    def key_escape(self) -> None:
+        self.dismiss(None)
+
+    def key_question_mark(self) -> None:
+        self.dismiss(None)
