@@ -9,7 +9,7 @@
 Built with [Textual](https://textual.textualize.io/) + [Rich](https://rich.readthedocs.io/) — no GUI, no browser, just your terminal.
 
 ---
-<img width="1465" height="910" alt="image" src="https://github.com/user-attachments/assets/0d8af353-09af-4e1b-be8a-f8705ec60316" />
+<img width="561" height="673" alt="image" src="https://github.com/user-attachments/assets/57252058-e798-46dc-a8b5-2dab8f175fa2" />
 
 
 ## ✨ Why?
@@ -65,6 +65,7 @@ pip install --no-index --find-links=/tmp/ssh-mngr-wheels/ ssh-mngr
 ssh-mngr     # launch the TUI
 ssm           # short alias — same thing
 ```
+<img width="1465" height="910" alt="image" src="https://github.com/user-attachments/assets/0d8af353-09af-4e1b-be8a-f8705ec60316" />
 
 ---
 
