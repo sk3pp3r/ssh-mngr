@@ -22,7 +22,7 @@ If you SSH into multiple Linux servers daily — some with your user, some with 
 
 ```bash
 # Homebrew (macOS)
-brew tap sk3pp3r/tap
+brew tap sk3pp3r/ssh-mngr https://github.com/sk3pp3r/ssh-mngr
 brew install ssh-mngr
 
 # From PyPI
