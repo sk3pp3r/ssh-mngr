@@ -37,9 +37,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/ssh-mngr"
-Repository = "https://github.com/YOUR_USERNAME/ssh-mngr"
-Issues = "https://github.com/YOUR_USERNAME/ssh-mngr/issues"
+Homepage = "https://github.com/sk3pp3r/ssh-mngr"
+Repository = "https://github.com/sk3pp3r/ssh-mngr"
+Issues = "https://github.com/sk3pp3r/ssh-mngr/issues"
 
 [project.scripts]
 ssh-mngr = "ssh_mngr.app:main"

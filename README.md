@@ -31,7 +31,7 @@ pip install ssh-mngr
 ### Install from source
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ssh-mngr.git
+git clone https://github.com/sk3pp3r/ssh-mngr.git
 cd ssh-mngr
 pip install .
 ```
@@ -214,7 +214,7 @@ pipx install ssh-mngr
 ## 🤝 Contributing
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ssh-mngr.git
+git clone https://github.com/sk3pp3r/ssh-mngr.git
 cd ssh-mngr
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
