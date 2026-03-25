@@ -9,6 +9,8 @@
 Built with [Textual](https://textual.textualize.io/) + [Rich](https://rich.readthedocs.io/) — no GUI, no browser, just your terminal.
 
 ---
+<img width="1465" height="910" alt="image" src="https://github.com/user-attachments/assets/0d8af353-09af-4e1b-be8a-f8705ec60316" />
+
 
 ## ✨ Why?
 
